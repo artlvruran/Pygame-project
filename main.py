@@ -14,7 +14,6 @@ screen = pygame.display.set_mode(SCREEN_SIZE)
 clock = pygame.time.Clock()
 
 all_sprites = pygame.sprite.Group()
-tiles_group = pygame.sprite.Group()
 enemies_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 box_group = pygame.sprite.Group()
@@ -77,22 +76,14 @@ class Field:
 
 
 class AnimatedSprite(pygame.sprite.Sprite):
-    def __init__(self, group, sheet, columns, rows, x, y):
+    def __init__(self, group, frames, x, y):
         super().__init__(all_sprites, group)
-        self.frames = []
-        self.cut_sheet(sheet, columns, rows)
+        self.names = frames
+        self.frames = [load_image(frame) for frame in self.names]
         self.cur_frame = 0
         self.image = self.frames[self.cur_frame]
+        self.rect = self.image.get_rect()
         self.rect = self.rect.move(x, y)
-
-    def cut_sheet(self, sheet, columns, rows):
-        self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
-                                sheet.get_height() // rows)
-        for j in range(rows):
-            for i in range(columns):
-                frame_location = (self.rect.w * i, self.rect.h * j)
-                self.frames.append(sheet.subsurface(pygame.Rect(
-                    frame_location, self.rect.size)))
 
     def update(self):
         self.cur_frame = (self.cur_frame + 1) % len(self.frames)
@@ -100,22 +91,49 @@ class AnimatedSprite(pygame.sprite.Sprite):
 
 
 class Hero(AnimatedSprite):
-    player_image = load_image('knights_sprites .png')
+    #player_image = load_image('knights_sprites .png')
+    images_walking_rightup = [f'crusader_walk_300{str(i).ljust(2, "0")}.png' for i in range(15)]
+    images_walking_leftup = [f'crusader_walk_500{str(i).ljust(2, "0")}.png' for i in range(15)]
+    images_walking_rightdown = [f'crusader_walk_100{str(i).ljust(2, "0")}.png' for i in range(15)]
+    images_walking_leftdown = [f'crusader_walk_200{str(i).ljust(2, "0")}.png' for i in range(15)]
+    images_idle = ['crusader_idle.png']
 
     def __init__(self, pos_x, pos_y):
-        xx = pos_y * TILE_WIDTH // 2
-        yy = 320 - pos_y * TILE_HEIGHT // 2
-        super().__init__(player_group, Hero.player_image, 3, 1, xx + pos_x * TILE_WIDTH // 2, yy + pos_x * TILE_HEIGHT // 2)
+        self.pos_x = pos_x
+        self.pos_y = pos_y
+        xx = pos_y * TILE_WIDTH // 2 + TILE_WIDTH // 2
+        yy = 320 - pos_y * TILE_HEIGHT // 2 - 1.5 * TILE_HEIGHT
+        super().__init__(player_group, Hero.images_idle, xx + pos_x * TILE_WIDTH // 2,
+                         yy + pos_x * TILE_HEIGHT // 2)
+        self.mode = 'idle'
 
-
+        """if pygame.sprite.spritecollideany(self, layers_sprites[1]):
+            self.rect.x -= kx * (TILE_WIDTH // 2)
+            self.rect.y -= ky * (TILE_HEIGHT // 2)"""
+    def update(self):
+        super().update()
+        if self.mode == 'idle':
+            self.names = Hero.images_idle
+        if self.mode == 'walking_leftup':
+            self.names = Hero.images_walking_leftup
+        if self.mode == 'walking_rightup':
+            self.names = Hero.images_walking_rightup
+        if self.mode == 'walking_leftdown':
+            self.names = Hero.images_walking_leftdown
+        if self.mode == 'walking_rightdown':
+            self.names = Hero.images_walking_rightdown
 
 
 class Enemy:
     pass
 
 
-class Tile:
-    pass
+class Tile(pygame.sprite.Sprite):
+    def __init__(self, image, x, y):
+        super().__init__(all_sprites)
+        self.image = image
+        self.rect = self.image.get_rect().move(x, y)
+
 
 
 """class Camera:
@@ -142,23 +160,32 @@ def main():
     running = True
     field = Field('map1.tmx')
 
-    player = Hero(0, 0)
-    player_group.add(player)
+    hero = Hero(0, 0)
+    player_group.add(hero)
 
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            if pygame.key.get_pressed()[pygame.K_LEFT]:
-                player.update(-1, 0)
-            if pygame.key.get_pressed()[pygame.K_RIGHT]:
-                player.update(1, 0)
             if pygame.key.get_pressed()[pygame.K_UP]:
-                player.update(0, -1)
+                hero.rect.x += TILE_WIDTH // 2
+                hero.rect.y -= TILE_HEIGHT // 2
+                hero.mode = 'rightup'
             if pygame.key.get_pressed()[pygame.K_DOWN]:
-                player.update(0, 1)
+                hero.rect.x -= TILE_WIDTH // 2
+                hero.rect.y += TILE_HEIGHT // 2
+                hero.mode = 'leftdown'
+            if pygame.key.get_pressed()[pygame.K_LEFT]:
+                hero.rect.x -= TILE_WIDTH // 2
+                hero.rect.y -= TILE_HEIGHT // 2
+                hero.mode = 'leftup'
+            if pygame.key.get_pressed()[pygame.K_RIGHT]:
+                hero.rect.x += TILE_WIDTH // 2
+                hero.rect.y += TILE_HEIGHT // 2
+                hero.mode = 'right_down'
         screen.fill((0, 0, 0))
         field.render(screen)
+        all_sprites.update()
         all_sprites.draw(screen)
         pygame.display.flip()
     pygame.quit()
