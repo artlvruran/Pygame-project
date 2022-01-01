@@ -5,8 +5,8 @@
     },
     "activeFile": "map1.tmx",
     "expandedProjectPaths": [
-        ".",
-        "C:/Users/Павел/Desktop/pygame Project"
+        "C:/Users/Павел/Desktop/pygame Project",
+        "."
     ],
     "fileStates": {
         "": {
@@ -14,14 +14,17 @@
             "scaleInEditor": 1
         },
         "map1.tmx": {
-            "scale": 1,
-            "selectedLayer": 0,
+            "scale": 0.75,
+            "selectedLayer": 2,
             "viewCenter": {
-                "x": 694,
-                "y": 499
+                "x": 700.6666666666666,
+                "y": 545.3333333333333
             }
         },
         "map1.tmx#Preview_258": {
+            "scaleInDock": 1
+        },
+        "map1.tmx#Tileset": {
             "scaleInDock": 1
         },
         "map1.tmx#im": {

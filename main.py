@@ -78,8 +78,7 @@ class Field:
 class AnimatedSprite(pygame.sprite.Sprite):
     def __init__(self, group, frames, x, y):
         super().__init__(all_sprites, group)
-        self.names = frames
-        self.frames = [load_image(frame) for frame in self.names]
+        self.frames = [load_image(frame) for frame in frames]
         self.cur_frame = 0
         self.image = self.frames[self.cur_frame]
         self.rect = self.image.get_rect()
@@ -91,37 +90,22 @@ class AnimatedSprite(pygame.sprite.Sprite):
 
 
 class Hero(AnimatedSprite):
-    #player_image = load_image('knights_sprites .png')
-    images_walking_rightup = [f'crusader_walk_300{str(i).ljust(2, "0")}.png' for i in range(15)]
-    images_walking_leftup = [f'crusader_walk_500{str(i).ljust(2, "0")}.png' for i in range(15)]
-    images_walking_rightdown = [f'crusader_walk_100{str(i).ljust(2, "0")}.png' for i in range(15)]
-    images_walking_leftdown = [f'crusader_walk_200{str(i).ljust(2, "0")}.png' for i in range(15)]
-    images_idle = ['crusader_idle.png']
+    Image = 'knight_rightdown.png'
 
     def __init__(self, pos_x, pos_y):
         self.pos_x = pos_x
         self.pos_y = pos_y
         xx = pos_y * TILE_WIDTH // 2 + TILE_WIDTH // 2
         yy = 320 - pos_y * TILE_HEIGHT // 2 - 1.5 * TILE_HEIGHT
-        super().__init__(player_group, Hero.images_idle, xx + pos_x * TILE_WIDTH // 2,
+        super().__init__(player_group, [Hero.Image], xx + pos_x * TILE_WIDTH // 2,
                          yy + pos_x * TILE_HEIGHT // 2)
-        self.mode = 'idle'
+        self.mode = 'rightdown'
 
-        """if pygame.sprite.spritecollideany(self, layers_sprites[1]):
-            self.rect.x -= kx * (TILE_WIDTH // 2)
-            self.rect.y -= ky * (TILE_HEIGHT // 2)"""
     def update(self):
         super().update()
-        if self.mode == 'idle':
-            self.names = Hero.images_idle
-        if self.mode == 'walking_leftup':
-            self.names = Hero.images_walking_leftup
-        if self.mode == 'walking_rightup':
-            self.names = Hero.images_walking_rightup
-        if self.mode == 'walking_leftdown':
-            self.names = Hero.images_walking_leftdown
-        if self.mode == 'walking_rightdown':
-            self.names = Hero.images_walking_rightdown
+        self.frames = [f'knight_{self.mode}.png']
+
+
 
 
 class Enemy:
@@ -182,11 +166,11 @@ def main():
             if pygame.key.get_pressed()[pygame.K_RIGHT]:
                 hero.rect.x += TILE_WIDTH // 2
                 hero.rect.y += TILE_HEIGHT // 2
-                hero.mode = 'right_down'
+                hero.mode = 'rightdown'
         screen.fill((0, 0, 0))
         field.render(screen)
         all_sprites.update()
-        all_sprites.draw(screen)
+        screen.blit(hero.image, hero.rect)
         pygame.display.flip()
     pygame.quit()
 main()

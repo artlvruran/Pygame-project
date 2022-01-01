@@ -11,12 +11,12 @@
  </layer>
  <layer id="5" name="Слой тайлов 2" width="20" height="20">
   <data encoding="base64" compression="zlib">
-   eJxjYBgFgxnwIGFqmYfNXHLNx6aPEjfj0kNt8wjJjZpHffMIxSG2tIlPDzXzBbqZtDKX2mYOtHkAPGsB+Q==
+   eJxjYBgFgxnwIGFqmYfNXGqZj81sappJTbtw6SHX3eSYR47cUDAPX1wRMo8HBybVPHIALdIusrnUNnOgAQDQuwI1
   </data>
  </layer>
  <layer id="6" name="Слой тайлов 3" width="20" height="20">
   <data encoding="base64" compression="zlib">
-   eJztkDEOwDAIAy1e4v+/sh2KxBJIqCNlyElMwBEHuKiwt/iVyofg++sd7bPhznZWXY7VI9MQ+TuyXmdn1WfQ5nVnpzeanfF5DiL/c3XWeHsHPNTlqHKz8FV3HtegAsU=
+   eJxjYBgF1AJMQKwAxdQyjwHJPGqZiw4UqGw2Nc0iFygQkOehspmkmsfEgIhfagF85pFiFxMajU8NDxQrMOBPR9T2K8xMWpgLAgqD1KzBBgB4sgIJ
   </data>
  </layer>
 </map>
