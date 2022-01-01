@@ -7,6 +7,7 @@ import pytmx
 FPS = 60
 SCREEN_SIZE = WIDTH, HEIGHT = 1300, 700
 TILE_WIDTH, TILE_HEIGHT = 64, 32
+FIELD_WIDTH, FIELD_HEIGHT = 20, 20
 MAPS_DIR = 'maps'
 
 pygame.init()
@@ -17,6 +18,8 @@ all_sprites = pygame.sprite.Group()
 enemies_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 box_group = pygame.sprite.Group()
+layers = [pygame.sprite.Group() for i in range(3)]
+tiles = [[[0] * (FIELD_WIDTH + 1) for __ in range(FIELD_HEIGHT + 1)] for _ in range(3)]
 
 
 def load_image(name, colorkey=None):
@@ -61,15 +64,18 @@ class Field:
         self.tile_height = self.map.tileheight
         self.tile_width = self.map.tilewidth
 
-    def render(self, screen):
+    def create(self, screen):
         for layer in range(3):
-            for y in range(self.height - 1, 0, -1):
+            for y in range(self.height - 1, -1, -1):
                 xx = y * TILE_WIDTH // 2
                 yy = 320 - y * TILE_HEIGHT // 2
-                for x in range(self.width):
-                    image = self.map.get_tile_image(x, y, layer)
+                for x in range(0, self.width):
+                    image = self.map.get_tile_image(x, self.height - y - 1, layer)
                     if image:
-                        screen.blit(image, (xx + x * TILE_WIDTH // 2, yy + x * TILE_HEIGHT // 2))
+                        tile = Tile(image, xx + x * TILE_WIDTH // 2, yy + x * TILE_HEIGHT // 2 - TILE_HEIGHT * layer)
+                        layers[layer].add(tile)
+                        tiles[layer][y][x] = 1
+                    print(x, y)
 
     def get_tile_id(self, position):
         return self.map.tiledgidmap[self.map.get_tile_gid(*position, 0)]
@@ -95,15 +101,29 @@ class Hero(AnimatedSprite):
     def __init__(self, pos_x, pos_y):
         self.pos_x = pos_x
         self.pos_y = pos_y
-        xx = pos_y * TILE_WIDTH // 2 + TILE_WIDTH // 2
-        yy = 320 - pos_y * TILE_HEIGHT // 2 - 1.5 * TILE_HEIGHT
+        xx = pos_y * TILE_WIDTH // 2
+        yy = 320 - pos_y * TILE_HEIGHT // 2 - TILE_HEIGHT
         super().__init__(player_group, [Hero.Image], xx + pos_x * TILE_WIDTH // 2,
                          yy + pos_x * TILE_HEIGHT // 2)
         self.mode = 'rightdown'
 
     def update(self):
         super().update()
-        self.frames = [f'knight_{self.mode}.png']
+        self.frames = [load_image(f'knight_{self.mode}.png')]
+
+    def move(self, dx, dy, mode, dpos_x, dpos_y):
+        self.rect.x += dx
+        self.rect.y += dy
+        self.mode = mode
+        if not (0 <= self.pos_y + dpos_y < FIELD_HEIGHT) or\
+                not (0 <= self.pos_x + dpos_x < FIELD_WIDTH) or\
+                tiles[1][self.pos_y + dpos_y][self.pos_x + dpos_x]:
+            self.rect.x -= dx
+            self.rect.y -= dy
+        else:
+            self.pos_x += dpos_x
+            self.pos_y += dpos_y
+        print(self.pos_x, self.pos_y)
 
 
 
@@ -143,6 +163,7 @@ def main():
     screen.fill((0, 0, 0))
     running = True
     field = Field('map1.tmx')
+    field.create(screen)
 
     hero = Hero(0, 0)
     player_group.add(hero)
@@ -152,25 +173,19 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
             if pygame.key.get_pressed()[pygame.K_UP]:
-                hero.rect.x += TILE_WIDTH // 2
-                hero.rect.y -= TILE_HEIGHT // 2
-                hero.mode = 'rightup'
+                hero.move(TILE_WIDTH // 2, -TILE_HEIGHT // 2, 'rightup', 0, 1)
             if pygame.key.get_pressed()[pygame.K_DOWN]:
-                hero.rect.x -= TILE_WIDTH // 2
-                hero.rect.y += TILE_HEIGHT // 2
-                hero.mode = 'leftdown'
+                hero.move(-TILE_WIDTH // 2, TILE_HEIGHT // 2, 'leftdown', 0, -1)
             if pygame.key.get_pressed()[pygame.K_LEFT]:
-                hero.rect.x -= TILE_WIDTH // 2
-                hero.rect.y -= TILE_HEIGHT // 2
-                hero.mode = 'leftup'
+                hero.move(-TILE_WIDTH // 2, -TILE_HEIGHT // 2, 'leftup', -1, 0)
             if pygame.key.get_pressed()[pygame.K_RIGHT]:
-                hero.rect.x += TILE_WIDTH // 2
-                hero.rect.y += TILE_HEIGHT // 2
-                hero.mode = 'rightdown'
+                hero.move(TILE_WIDTH // 2, TILE_HEIGHT // 2, 'rightdown', 1, 0)
         screen.fill((0, 0, 0))
-        field.render(screen)
         all_sprites.update()
+        layers[0].draw(screen)
         screen.blit(hero.image, hero.rect)
+        for layer in layers[1:]:
+            layer.draw(screen)
         pygame.display.flip()
     pygame.quit()
 main()
