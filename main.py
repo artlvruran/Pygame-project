@@ -65,17 +65,16 @@ class Field:
         self.tile_width = self.map.tilewidth
 
     def create(self, screen):
-        for layer in range(3):
-            for y in range(self.height - 1, -1, -1):
-                xx = y * TILE_WIDTH // 2
-                yy = 320 - y * TILE_HEIGHT // 2
-                for x in range(0, self.width):
-                    image = self.map.get_tile_image(x, self.height - y - 1, layer)
-                    if image:
-                        tile = Tile(image, xx + x * TILE_WIDTH // 2, yy + x * TILE_HEIGHT // 2 - TILE_HEIGHT * layer)
-                        layers[layer].add(tile)
-                        tiles[layer][y][x] = 1
-                    print(x, y)
+        for y in range(self.height - 1, -1, -1):
+            xx = y * TILE_WIDTH // 2
+            yy = 320 - y * TILE_HEIGHT // 2
+            for x in range(0, self.width):
+                image = self.map.get_tile_image(x, self.height - y - 1, layer)
+                if image:
+                    tile = Tile(image, xx + x * TILE_WIDTH // 2, yy + x * TILE_HEIGHT // 2 - TILE_HEIGHT * layer)
+                    layers[layer].add(tile)
+                    tiles[layer][y][x] = 1
+                print(x, y)
 
     def get_tile_id(self, position):
         return self.map.tiledgidmap[self.map.get_tile_gid(*position, 0)]
@@ -96,34 +95,12 @@ class AnimatedSprite(pygame.sprite.Sprite):
 
 
 class Hero(AnimatedSprite):
-    Image = 'knight_rightdown.png'
 
     def __init__(self, pos_x, pos_y):
         self.pos_x = pos_x
         self.pos_y = pos_y
-        xx = pos_y * TILE_WIDTH // 2
-        yy = 320 - pos_y * TILE_HEIGHT // 2 - TILE_HEIGHT
-        super().__init__(player_group, [Hero.Image], xx + pos_x * TILE_WIDTH // 2,
-                         yy + pos_x * TILE_HEIGHT // 2)
-        self.mode = 'rightdown'
 
-    def update(self):
-        super().update()
-        self.frames = [load_image(f'knight_{self.mode}.png')]
 
-    def move(self, dx, dy, mode, dpos_x, dpos_y):
-        self.rect.x += dx
-        self.rect.y += dy
-        self.mode = mode
-        if not (0 <= self.pos_y + dpos_y < FIELD_HEIGHT) or\
-                not (0 <= self.pos_x + dpos_x < FIELD_WIDTH) or\
-                tiles[1][self.pos_y + dpos_y][self.pos_x + dpos_x]:
-            self.rect.x -= dx
-            self.rect.y -= dy
-        else:
-            self.pos_x += dpos_x
-            self.pos_y += dpos_y
-        print(self.pos_x, self.pos_y)
 
 
 
