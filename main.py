@@ -178,7 +178,7 @@ def main():
                 moving = True
             if event.type == pygame.MOUSEBUTTONUP:
                 moving = False
-            if event.type == pygame.K_SPACE:
+            if pygame.key.get_pressed()[pygame.K_SPACE]:
                 atacking = True
                 moving = False
 
@@ -209,7 +209,29 @@ def main():
         else:
             hero.change_mode('idle')
         if atacking:
-            hero.change_mode('attack')
+            if hero.cur_frame == len(hero.frames) - 1:
+                atacking = False
+                hero.change_mode('idle')
+                print(1)
+            else:
+                if hero.mode != 'attack':
+                    hero.change_mode('attack')
+                sx = pygame.mouse.get_pos()[0] - hero.rect.x
+                sy = pygame.mouse.get_pos()[1] - hero.rect.y
+                cos = sx / (sx ** 2 + sy ** 2) ** 0.5
+                sin = sy / (sx ** 2 + sy ** 2) ** 0.5
+                hero.change_mode('attack')
+                prev_key = hero.key
+                if 1 >= cos >= math.cos(math.pi / 4):
+                    hero.key = 'right'
+                elif -math.cos(math.pi / 4) >= cos >= -1:
+                    hero.key = 'left'
+                elif sin >= 0:
+                    hero.key = 'down'
+                else:
+                    hero.key = 'up'
+                if hero.key != prev_key:
+                    hero.change_mode('attack')
         clock.tick(32)
         screen.fill((6, 59, 36))
         all_sprites.update()
