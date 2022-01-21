@@ -108,6 +108,10 @@ class Hero(AnimatedSprite):
     run_left = load_image('run_left.png')
     run_up = load_image('run_up.png')
     run_down = load_image('run_down.png')
+    attack_right = load_image('attack_right.png')
+    attack_left = load_image('attack_left.png')
+    attack_up = load_image('attack_up.png')
+    attack_down = load_image('attack_down.png')
 
     def __init__(self, pos_x, pos_y):
         self.pos_x = pos_x
@@ -115,21 +119,32 @@ class Hero(AnimatedSprite):
         super().__init__(Hero.idle, 4, 1, pos_x, pos_y)
         self.mode = 'idle'
         self.key = 'right'
-        self.d = {
+        self.dict_run = {
             'right': Hero.run_right,
             'left': Hero.run_left,
             'up': Hero.run_up,
             'down': Hero.run_down
         }
+        self.dict_attack = {
+            'right': Hero.attack_right,
+            'left': Hero.attack_left,
+            'up': Hero.attack_up,
+            'down': Hero.attack_down
+        }
 
     def change_mode(self, mode):
         if mode == 'run':
             self.mode = 'run'
-            self.update_sheet(self.d[self.key], 8, 1)
+            self.update_sheet(self.dict_run[self.key], 8, 1)
 
         if mode == 'idle':
             self.mode = 'idle'
             self.update_sheet(Hero.idle, 4, 1)
+
+        if mode == 'attack':
+            self.mode = 'attack'
+            self.update_sheet(self.dict_attack[self.key], 6, 1)
+
 
 class Enemy:
     pass
@@ -152,6 +167,7 @@ def main():
     hero = Hero(100, 100)
     player_group.add(hero)
     moving = False
+    atacking = False
 
     while running:
         for event in pygame.event.get():
@@ -162,6 +178,10 @@ def main():
                 moving = True
             if event.type == pygame.MOUSEBUTTONUP:
                 moving = False
+            if event.type == pygame.K_SPACE:
+                atacking = True
+                moving = False
+
         if hero.rect.x == pygame.mouse.get_pos()[0] and hero.rect.y == pygame.mouse.get_pos()[1]:
             moving = False
         if moving:
@@ -188,6 +208,8 @@ def main():
             hero.rect.y = hero.pos_y
         else:
             hero.change_mode('idle')
+        if atacking:
+            hero.change_mode('attack')
         clock.tick(32)
         screen.fill((6, 59, 36))
         all_sprites.update()
