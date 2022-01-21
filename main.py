@@ -104,7 +104,10 @@ class AnimatedSprite(pygame.sprite.Sprite):
 
 class Hero(AnimatedSprite):
     idle = load_image('idle.png')
-    run = load_image('run.png')
+    run_right = load_image('run_right.png')
+    run_left = load_image('run_left.png')
+    run_up = load_image('run_up.png')
+    run_down = load_image('run_down.png')
 
     def __init__(self, pos_x, pos_y):
         self.pos_x = pos_x
@@ -112,11 +115,18 @@ class Hero(AnimatedSprite):
         super().__init__(Hero.idle, 4, 1, pos_x, pos_y)
         self.mode = 'idle'
         self.key = 'right'
+        self.d = {
+            'right': Hero.run_right,
+            'left': Hero.run_left,
+            'up': Hero.run_up,
+            'down': Hero.run_down
+        }
 
     def change_mode(self, mode):
         if mode == 'run':
             self.mode = 'run'
-            self.update_sheet(Hero.run, 8, 1)
+            self.update_sheet(self.d[self.key], 8, 1)
+
         if mode == 'idle':
             self.mode = 'idle'
             self.update_sheet(Hero.idle, 4, 1)
@@ -152,6 +162,8 @@ def main():
                 moving = True
             if event.type == pygame.MOUSEBUTTONUP:
                 moving = False
+        if hero.rect.x == pygame.mouse.get_pos()[0] and hero.rect.y == pygame.mouse.get_pos()[1]:
+            moving = False
         if moving:
             if hero.mode != 'run':
                 hero.change_mode('run')
@@ -159,13 +171,24 @@ def main():
             sy = pygame.mouse.get_pos()[1] - hero.rect.y
             cos = sx / (sx ** 2 + sy ** 2) ** 0.5
             sin = sy / (sx ** 2 + sy ** 2) ** 0.5
+            prev_key = hero.key
+            if 1 >= cos >= math.cos(math.pi / 4):
+                hero.key = 'right'
+            elif -math.cos(math.pi / 4) >= cos >= -1:
+                hero.key = 'left'
+            elif sin >= 0:
+                hero.key = 'down'
+            else:
+                hero.key = 'up'
+            if hero.key != prev_key:
+                hero.change_mode('run')
             hero.pos_x += cos
             hero.pos_y += sin
             hero.rect.x = hero.pos_x
             hero.rect.y = hero.pos_y
         else:
             hero.change_mode('idle')
-        clock.tick(30)
+        clock.tick(32)
         screen.fill((6, 59, 36))
         all_sprites.update()
         all_sprites.draw(screen)
