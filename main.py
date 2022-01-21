@@ -1,5 +1,6 @@
 import sys
 import os
+import math
 
 import pygame
 import pytmx
@@ -18,7 +19,6 @@ all_sprites = pygame.sprite.Group()
 enemies_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 box_group = pygame.sprite.Group()
-layers = [pygame.sprite.Group() for i in range(3)]
 tiles = [[[0] * (FIELD_WIDTH + 1) for __ in range(FIELD_HEIGHT + 1)] for _ in range(3)]
 
 
@@ -56,7 +56,7 @@ def start_screen(screen, clock):
             clock.tick(FPS)
 
 
-class Field:
+"""class Field:
     def __init__(self, filename):
         self.map = pytmx.load_pygame(f'{MAPS_DIR}/{filename}')
         self.height = self.map.height
@@ -66,103 +66,111 @@ class Field:
 
     def create(self, screen):
         for y in range(self.height - 1, -1, -1):
-            xx = y * TILE_WIDTH // 2
-            yy = 320 - y * TILE_HEIGHT // 2
             for x in range(0, self.width):
-                image = self.map.get_tile_image(x, self.height - y - 1, layer)
-                if image:
-                    tile = Tile(image, xx + x * TILE_WIDTH // 2, yy + x * TILE_HEIGHT // 2 - TILE_HEIGHT * layer)
-                    layers[layer].add(tile)
-                    tiles[layer][y][x] = 1
-                print(x, y)
+                image = self.map.get_tile_image(x, self.height - y - 1, 0)
 
     def get_tile_id(self, position):
-        return self.map.tiledgidmap[self.map.get_tile_gid(*position, 0)]
+        return self.map.tiledgidmap[self.map.get_tile_gid(*position, 0)]"""
 
 
 class AnimatedSprite(pygame.sprite.Sprite):
-    def __init__(self, group, frames, x, y):
-        super().__init__(all_sprites, group)
-        self.frames = [load_image(frame) for frame in frames]
+    def __init__(self, sheet, columns, rows, x, y):
+        super().__init__(all_sprites)
+        self.frames = []
+        self.cut_sheet(sheet, columns, rows, 0, 0)
         self.cur_frame = 0
         self.image = self.frames[self.cur_frame]
-        self.rect = self.image.get_rect()
         self.rect = self.rect.move(x, y)
+
+    def cut_sheet(self, sheet, columns, rows, x, y):
+        self.rect = pygame.Rect(x, y, sheet.get_width() // columns,
+                                sheet.get_height() // rows)
+        for j in range(rows):
+            for i in range(columns):
+                frame_location = (self.rect.w * i, self.rect.h * j)
+                self.frames.append(sheet.subsurface(pygame.Rect(
+                    frame_location, self.rect.size)))
 
     def update(self):
         self.cur_frame = (self.cur_frame + 1) % len(self.frames)
         self.image = self.frames[self.cur_frame]
 
+    def update_sheet(self, sheet, columns, rows):
+        self.frames = []
+        self.cut_sheet(sheet, columns, rows, self.rect.x, self.rect.y)
+        self.cur_frame = 0
+        self.image = self.frames[self.cur_frame]
+
 
 class Hero(AnimatedSprite):
+    idle = load_image('idle.png')
+    run = load_image('run.png')
 
     def __init__(self, pos_x, pos_y):
         self.pos_x = pos_x
         self.pos_y = pos_y
+        super().__init__(Hero.idle, 4, 1, pos_x, pos_y)
+        self.mode = 'idle'
+        self.key = 'right'
 
-
-
-
-
+    def change_mode(self, mode):
+        if mode == 'run':
+            self.mode = 'run'
+            self.update_sheet(Hero.run, 8, 1)
+        if mode == 'idle':
+            self.mode = 'idle'
+            self.update_sheet(Hero.idle, 4, 1)
 
 class Enemy:
     pass
 
 
-class Tile(pygame.sprite.Sprite):
+"""class Tile(pygame.sprite.Sprite):
     def __init__(self, image, x, y):
         super().__init__(all_sprites)
         self.image = image
-        self.rect = self.image.get_rect().move(x, y)
-
-
-
-"""class Camera:
-    def __init__(self):
-        self.dx = 0
-        self.dy = 0
-
-    def apply(self, obj):
-        obj.rect.x = (obj.rect.x + self.dx) % (len(load_level(level_name)[0]) * tile_width)
-        obj.rect.y = (obj.rect.y + self.dy) % (len(load_level(level_name)) * tile_height)
-
-    def update(self, target):
-        self.dx = -(target.rect.x + target.rect.w // 2 - WIDTH // 2)
-        self.dy = -(target.rect.y + target.rect.h // 2 - HEIGHT // 2)
-"""
+        self.rect = self.image.get_rect().move(x, y)"""
 
 
 def main():
-
-    # camera = Camera()
-
     start_screen(screen, clock)
     screen.fill((0, 0, 0))
     running = True
-    field = Field('map1.tmx')
-    field.create(screen)
+    """field = Field('map1.tmx')
+    field.create(screen)"""
 
-    hero = Hero(0, 0)
+    hero = Hero(100, 100)
     player_group.add(hero)
+    moving = False
 
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            if pygame.key.get_pressed()[pygame.K_UP]:
-                hero.move(TILE_WIDTH // 2, -TILE_HEIGHT // 2, 'rightup', 0, 1)
-            if pygame.key.get_pressed()[pygame.K_DOWN]:
-                hero.move(-TILE_WIDTH // 2, TILE_HEIGHT // 2, 'leftdown', 0, -1)
-            if pygame.key.get_pressed()[pygame.K_LEFT]:
-                hero.move(-TILE_WIDTH // 2, -TILE_HEIGHT // 2, 'leftup', -1, 0)
-            if pygame.key.get_pressed()[pygame.K_RIGHT]:
-                hero.move(TILE_WIDTH // 2, TILE_HEIGHT // 2, 'rightdown', 1, 0)
-        screen.fill((0, 0, 0))
+            if event.type == pygame.MOUSEBUTTONDOWN and \
+                    (hero.rect.x != pygame.mouse.get_pos()[0] or hero.rect.y != pygame.mouse.get_pos()[1]):
+                moving = True
+            if event.type == pygame.MOUSEBUTTONUP:
+                moving = False
+        if moving:
+            if hero.mode != 'run':
+                hero.change_mode('run')
+            sx = pygame.mouse.get_pos()[0] - hero.rect.x
+            sy = pygame.mouse.get_pos()[1] - hero.rect.y
+            cos = sx / (sx ** 2 + sy ** 2) ** 0.5
+            sin = sy / (sx ** 2 + sy ** 2) ** 0.5
+            hero.pos_x += cos
+            hero.pos_y += sin
+            hero.rect.x = hero.pos_x
+            hero.rect.y = hero.pos_y
+        else:
+            hero.change_mode('idle')
+        clock.tick(30)
+        screen.fill((6, 59, 36))
         all_sprites.update()
-        layers[0].draw(screen)
-        screen.blit(hero.image, hero.rect)
-        for layer in layers[1:]:
-            layer.draw(screen)
+        all_sprites.draw(screen)
         pygame.display.flip()
     pygame.quit()
+
+
 main()
