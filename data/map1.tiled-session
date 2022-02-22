@@ -1,0 +1,98 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "C:/Users/Павел/Desktop/pygame Project/data/tiles.tmx",
+    "expandedProjectPaths": [
+        "C:/Users/Павел/PycharmProjects/Pygame_project/maps"
+    ],
+    "fileStates": {
+        "": {
+            "scaleInDock": 0.25
+        },
+        "C:/Users/Павел/Desktop/pygame Project/data/map1.tmx": {
+            "scale": 1,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 353.5,
+                "y": 376
+            }
+        },
+        "C:/Users/Павел/Desktop/pygame Project/data/map1.tmx#characters": {
+            "dynamicWrapping": false,
+            "scaleInDock": 2
+        },
+        "C:/Users/Павел/Desktop/pygame Project/data/map1.tmx#forest-palette02-day": {
+            "scaleInEditor": 3
+        },
+        "C:/Users/Павел/Desktop/pygame Project/data/map1.tmx#forest-palette03-day": {
+            "scaleInDock": 1.5
+        },
+        "C:/Users/Павел/Desktop/pygame Project/data/map1.tmx#indoors": {
+            "scaleInDock": 3
+        },
+        "C:/Users/Павел/Desktop/pygame Project/data/map1.tmx#outdoors": {
+            "scaleInDock": 1
+        },
+        "C:/Users/Павел/Desktop/pygame Project/data/map2.tmx": {
+            "scale": 1,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 334.5,
+                "y": 267
+            }
+        },
+        "C:/Users/Павел/Desktop/pygame Project/data/map2.tmx#0x72_DungeonTilesetII_v1.4": {
+            "scaleInDock": 1
+        },
+        "C:/Users/Павел/Desktop/pygame Project/data/map2.tmx#h": {
+            "dynamicWrapping": true,
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "C:/Users/Павел/Desktop/pygame Project/data/map2.tmx#outdoors": {
+            "scaleInDock": 1
+        },
+        "C:/Users/Павел/Desktop/pygame Project/data/tiles.tmx": {
+            "scale": 0.75,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 484.66666666666663,
+                "y": 393.3333333333333
+            }
+        },
+        "C:/Users/Павел/Desktop/pygame Project/data/tiles.tmx#Mossy - TileSet": {
+            "dynamicWrapping": false
+        },
+        "C:/Users/Павел/Desktop/pygame Project/data/tiles.tmx#jungle-ruinsv3": {
+            "scaleInDock": 1
+        },
+        "C:/Users/Павел/Desktop/pygame Project/maps/map1.tmx#forest-palette01-day": {
+            "scaleInEditor": 3
+        }
+    },
+    "last.imagePath": "C:/Users/Павел/PycharmProjects/Pygame_project/data/Tiles",
+    "map.height": 20,
+    "map.lastUsedFormat": "tmx",
+    "map.layerDataFormat": null,
+    "map.orientation": null,
+    "map.renderOrder": null,
+    "map.tileWidth": 32,
+    "map.width": 20,
+    "openFiles": [
+        "C:/Users/Павел/Desktop/pygame Project/data/tiles.tmx"
+    ],
+    "project": "map1.tiled-project",
+    "recentFiles": [
+        "C:/Users/Павел/Desktop/pygame Project/data/tiles.tmx",
+        "C:/Users/Павел/Desktop/pygame Project/data/map2.tmx",
+        "C:/Users/Павел/Desktop/pygame Project/data/map1.tmx"
+    ],
+    "tileset.embedInMap": true,
+    "tileset.tileSize": {
+        "height": 32,
+        "width": 32
+    },
+    "tileset.type": 0
+}
