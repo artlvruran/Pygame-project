@@ -22,38 +22,3 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self.frames = list_of_frames
         self.cur_frame = 0
         self.image = self.frames[self.cur_frame]
-
-
-class Particles(pygame.sprite.Sprite):
-    img = load_image('projectile.png')
-
-    def __init__(self, pos, dx, dy, all_sprites):
-        super().__init__(all_sprites)
-        self.image = Particles.img
-        self.rect = self.image.get_rect()
-
-        self.velocity = [dx, dy]
-
-        self.rect.x, self.rect.y = pos
-
-    def update(self):
-        self.rect.x += self.velocity[0]
-        self.rect.y += self.velocity[1]
-        if not self.rect.colliderect(screen_rect):
-            self.kill()
-
-
-class Enemy(AnimatedSprite):
-    img = [load_image('enemy.png')]
-    speed = 10
-
-    def __init__(self, x, y, all_sprites, number):
-        super().__init__(Enemy.img, x, y, all_sprites)
-        self.image = Enemy.img[0]
-        self.x, self.y = x, y
-        self.rect = pygame.Rect(x, y, self.image.get_width(), self.image.get_height())
-        self.particles = []
-        for i in range(number):
-            dx = math.cos(math.radians(i * (360 / number))) * Enemy.speed
-            dy = math.sin(math.radians(i * (360 / number))) * Enemy.speed
-            self.particles.append(Particles((x, y), dx, dy, all_sprites))

@@ -22,7 +22,8 @@ RADIUS = int(math.sqrt(THIRD_HEIGHT ** 2 + THIRD_WIDTH ** 2))
 all_sprites = pygame.sprite.Group()
 enemies_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
-box_group = pygame.sprite.Group()
+wall_group = pygame.sprite.Group()
+projectiles_group = pygame.sprite.Group()
 tiles = [[[0] * (FIELD_WIDTH + 1) for __ in range(FIELD_HEIGHT + 1)] for _ in range(3)]
 sword_animation = [pygame.transform.scale(load_image(f'SP301_0{i}.png'), (120, 120)) for i in range(1, 6)]
 
@@ -56,6 +57,57 @@ class Field:
 
 
 sword_im = pygame.transform.scale(load_image('saber.png'), (116, 16))
+
+
+class Particles(pygame.sprite.Sprite):
+    img = pygame.transform.scale(load_image('projectile.png'), (15, 15))
+
+    def __init__(self, pos, dx, dy, all_sprites):
+        super().__init__(all_sprites, projectiles_group)
+        self.image = Particles.img
+        self.rect = self.image.get_rect()
+
+        self.velocity = [dx, dy]
+
+        self.rect.x, self.rect.y = pos
+
+    def update(self):
+        self.rect.x += self.velocity[0]
+        self.rect.y += self.velocity[1]
+        if pygame.sprite.spritecollideany(self, player_group):
+            player = player_group.sprites()[0]
+            if self.rect.x + self.image.get_width() >= player.rect.x >= self.rect.x and self.velocity[0] > 0:
+                self.velocity[0] = -self.velocity[0]
+            elif player.rect.x + player.image.get_width() >= self.rect.x >= player.rect.x and self.velocity[0] < 0:
+                self.velocity[0] = -self.velocity[0]
+            if self.rect.y + self.image.get_height() >= player.rect.y >= self.rect.y and self.velocity[1] > 0:
+                self.velocity[1] = -self.velocity[1]
+            elif player.rect.y + player.image.get_height() >= self.rect.y >= player.rect.y and self.velocity[1] < 0:
+                self.velocity[1] = -self.velocity[1]
+
+        if not self.rect.colliderect(screen_rect):
+            self.kill()
+
+
+class Enemy(AnimatedSprite):
+    img = [load_image('enemy.png')]
+    speed = 10
+
+    def __init__(self, x, y, all_sprites, number):
+        super().__init__(Enemy.img, x, y, all_sprites)
+        self.image = Enemy.img[0]
+        self.x, self.y = x, y
+        self.rect = pygame.Rect(x, y, self.image.get_width(), self.image.get_height())
+        self.particles = []
+        self.number = number
+
+    def let_out(self, all_sprites):
+        for i in range(self.number):
+            dx = math.cos(math.radians(i * (360 / self.number))) * Enemy.speed
+            dy = math.sin(math.radians(i * (360 / self.number))) * Enemy.speed
+            self.particles.append(Particles((self.rect.x + self.image.get_width() // 2,
+                                             self.rect.y), dx, dy, all_sprites))
+
 
 
 class Angle:
@@ -98,7 +150,6 @@ class Hero(AnimatedSprite):
     def advance(self):
         cos, sin = mainAngle.cos, mainAngle.sin
         if cos < 0 and not self.flip or cos > 0 and self.flip:
-            print(1)
             self.flip = not self.flip
             self.move_frames = [pygame.transform.flip(self.move_frames[0], True, False),
                                 pygame.transform.flip(self.move_frames[1], True, False)]
@@ -116,6 +167,9 @@ class Hero(AnimatedSprite):
                 self.change_frame(self.move_frames)
         else:
             self.change_frame(self.idle_frame)
+        if pygame.sprite.spritecollideany(self, projectiles_group):
+            self.dx = -self.dx
+            self.dy = -self.dy
 
     def increase_progress(self, amount):
         self.progress += amount
@@ -149,23 +203,38 @@ class Camera:
 
 def main():
     field = Field('level1.tmx', spawn[1])
+
     level = 1
+
     tile_width = field.tile_size
+
     cursor_sprite = Cursor(0, 0)
+
     frame_offset = 0
+
     pygame.mouse.set_visible(False)
+
     camera = Camera()
 
     start_screen(screen, clock)
+
     screen.fill((0, 0, 0))
+
     running = True
+
     hero = Hero(screen.get_width() // 4, screen.get_height() // 4)
     player_group.add(hero)
 
     sword_anim_idx = None
 
     background_offset = 0
-    enemy = Enemy(16 * field.tile_size - spawn[level][0], 11 * field.tile_size - spawn[level][1], all_sprites, 8)
+
+    enemies = []
+    enemy1 = Enemy(16 * field.tile_size - spawn[level][0], 11 * field.tile_size - spawn[level][1], all_sprites, 8)
+    enemies += [enemy1]
+    enemy_progress = 0
+    for enemy in enemies:
+        enemies_group.add(enemy)
 
     while running:
         mx, my = pygame.mouse.get_pos()
@@ -199,8 +268,14 @@ def main():
         camera.dx += hero.dx
         camera.dy += hero.dy
 
-        enemy.rect.x = enemy.x - camera.dx
-        enemy.rect.y = enemy.y - camera.dy
+        for enemy in enemies:
+            enemy.rect.x = enemy.x - camera.dx
+            enemy.rect.y = enemy.y - camera.dy
+            enemy_progress += 0.5
+
+            if enemy_progress == 50:
+                enemy_progress = 0
+                enemy.let_out(all_sprites)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
