@@ -14,6 +14,7 @@ pygame.mixer.music.load('data/music/music.mp3')
 pygame.mixer.music.play(-1)
 pygame.mixer.music.set_volume(0.3)
 screen = pygame.display.set_mode(SCREEN_SIZE)
+pygame.display.set_caption('Green Sword')
 from entities import *
 
 
@@ -22,41 +23,57 @@ MAPS_DIR = './data/maps'
 
 
 clock = pygame.time.Clock()
+
 THIRD_WIDTH = WIDTH // 3
 THIRD_HEIGHT = HEIGHT // 3
 RADIUS = int(math.sqrt(THIRD_HEIGHT ** 2 + THIRD_WIDTH ** 2))
+
+MAX_HERO_HEALTH = 200
+
 all_sprites = pygame.sprite.Group()
 enemies_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 wall_group = pygame.sprite.Group()
 projectiles_group = pygame.sprite.Group()
-tiles = [[[0] * (FIELD_WIDTH + 1) for __ in range(FIELD_HEIGHT + 1)] for _ in range(3)]
+
+
 sword_animation = [pygame.transform.scale(load_image(f'SP301_0{i}.png'), (120, 120)) for i in range(1, 6)]
 SWORD_ANIM_SPEED = 0.3
-attack_power = 50
+attack_power = 5
+health_bar_img = pygame.transform.scale(load_image('health_bar.png'), (408, 20))
+
 sword_sound = pygame.mixer.Sound('data/music/sword.wav')
+thunder_sound = pygame.mixer.Sound('data/music/thunder.wav')
 
 spawn = {
-    1: (30, 4)
+    1: (30, 4),
+    2: (15, 14)
 }
 
 
 class Field:
-    def __init__(self, filename, spawn_pos):
+    free_tiles = {
+        1: 74,
+        2: 10
+    }
+
+    def __init__(self, filename, spawn_pos, level):
         self.map = pytmx.load_pygame(f'{MAPS_DIR}/{filename}')
         self.height = self.map.height
         self.width = self.map.width
         self.tile_size = self.map.tilewidth
         self.offset = spawn_pos
-        self.free_tiles = [74]
+        self.free_tiles = [Field.free_tiles[level]]
         self.finish_tiles = []
 
     def render(self, screen):
-        for y in range(self.height):
-            for x in range(self.width):
-                image = self.map.get_tile_image(x, y, 0)
-                screen.blit(image, (x * self.tile_size - self.offset[0] * self.tile_size,
-                                    y * self.tile_size - self.offset[1] * self.tile_size))
+        for z in range(len(self.map.layers)):
+            for y in range(self.height):
+                for x in range(self.width):
+                    image = self.map.get_tile_image(x, y, z)
+                    if image:
+                        screen.blit(image, (x * self.tile_size - self.offset[0] * self.tile_size,
+                                            y * self.tile_size - self.offset[1] * self.tile_size))
 
     def get_position(self, x, y, camera):
         pos_x = math.floor((x + camera.dx) / self.tile_size)
@@ -64,10 +81,14 @@ class Field:
         return pos_x, pos_y
 
     def get_tile_id(self, position):
-        return self.map.tiledgidmap[self.map.get_tile_gid(*position, 0)]
+        try:
+            sec = self.map.tiledgidmap[self.map.get_tile_gid(*position, 1)]
+        except KeyError:
+            sec = None
+        return self.map.tiledgidmap[self.map.get_tile_gid(*position, 0)], sec
 
     def is_free(self, position):
-        return self.get_tile_id(position) in self.free_tiles
+        return self.get_tile_id(position)[0] in self.free_tiles and self.get_tile_id(position)[1] is None
 
 
 sword_im = pygame.transform.scale(load_image('saber.png'), (150, 18))
@@ -118,7 +139,7 @@ class Enemy(AnimatedSprite):
         self.number = number
         self.health = health
         self.dying = False
-        self.amount = 0.1
+        self.amount = 0.3
         self.progress = 0
 
     def let_out(self, all_sprites):
@@ -130,13 +151,15 @@ class Enemy(AnimatedSprite):
                                                  self.rect.y), dx, dy, all_sprites))
 
     def update(self):
-        self.progress += self.amount
-        if int(self.progress) == len(self.frames) - 1 and self.dying:
-            self.kill()
-            all_sprites.remove(self)
-        else:
-            self.cur_frame = int(self.progress) % len(self.frames)
-            self.image = self.frames[self.cur_frame]
+        if self.alive():
+            self.progress += self.amount
+            if int(self.progress) == len(self.frames) - 1 and self.dying:
+                self.kill()
+                thunder_sound.play()
+                all_sprites.remove(self)
+            else:
+                self.cur_frame = int(self.progress) % len(self.frames)
+                self.image = self.frames[self.cur_frame]
 
 
 class Angle:
@@ -174,6 +197,7 @@ class Hero(AnimatedSprite):
         self.mode = 'idle'
         self.dx = 0
         self.dy = 0
+        self.health = MAX_HERO_HEALTH
         super().__init__([Hero.im_1, Hero.im_2], pos_x, pos_y, all_sprites)
 
     def advance(self):
@@ -199,6 +223,7 @@ class Hero(AnimatedSprite):
         if pygame.sprite.spritecollideany(self, projectiles_group):
             self.dx = -self.dx
             self.dy = -self.dy
+            self.health -= 15
 
     def increase_progress(self, amount):
         self.progress += amount
@@ -231,9 +256,8 @@ class Camera:
 
 
 def main():
-    field = Field('level1.tmx', spawn[1])
-
-    level = 1
+    level = 2
+    field = Field(f'level{level}.tmx', spawn[level], level)
 
     tile_width = field.tile_size
 
@@ -258,9 +282,11 @@ def main():
 
     background_offset = 0
 
-    enemies = []
-    enemy1 = Enemy(11 * field.tile_size - spawn[level][0], 11 * field.tile_size - spawn[level][1], all_sprites, 8, 50)
-    enemies += [enemy1]
+    if level == 1:
+        enemies = [Enemy(11 * field.tile_size - spawn[level][0], 11 * field.tile_size - spawn[level][1], all_sprites, 8, 50)]
+    if level == 2:
+        enemies = [Enemy(9 * field.tile_size - spawn[level][0], 10 * field.tile_size - spawn[level][1], all_sprites, 11, 100),
+                   Enemy(24 * field.tile_size - spawn[level][0], 27 * field.tile_size - spawn[level][1], all_sprites, 11, 100)]
     enemy_progress = 0
     for enemy in enemies:
         enemies_group.add(enemy)
@@ -269,6 +295,34 @@ def main():
         hero_render = [hero.rect.x, hero.rect.y]
         mx, my = pygame.mouse.get_pos()
         mainAngle.change(mx, my, (hero.rect.x, hero.rect.y))
+
+        if hero.health <= 0:
+            game_over_text_screen(screen, 'You died. Press r to reply.', screen, clock)
+            hero.kill()
+            level = 2
+
+            field = Field(f'level{level}.tmx', spawn[level], level)
+
+            tile_width = field.tile_size
+
+            cursor_sprite = Cursor(0, 0)
+
+            frame_offset = 0
+
+            pygame.mouse.set_visible(False)
+
+            camera = Camera()
+
+            screen.fill((0, 0, 0))
+
+            running = True
+
+            hero = Hero(screen.get_width() // 4, screen.get_height() // 4)
+            player_group.add(hero)
+
+            sword_anim_idx = None
+
+            background_offset = 0
 
         hero.speed = min(1, max(0, mainAngle.hyp - 100) / 150)
         hero.speed = hero.speed ** 2
@@ -304,7 +358,7 @@ def main():
             camera.dx += hero.dx
             camera.dy += hero.dy
 
-        for enemy in enemies:
+        for enemy in enemies_group:
             enemy.rect.x = enemy.x - camera.dx
             enemy.rect.y = enemy.y - camera.dy
             enemy_progress += 0.5
@@ -314,8 +368,9 @@ def main():
                     projectile.rect.y = projectile.rect.y - projectile.pos[1] + enemy.rect.y
                     projectile.pos = [enemy.rect.x, enemy.rect.y]
 
-            if enemy_progress == 50:
-                enemy_progress = 0
+        if enemy_progress == 50:
+            enemy_progress = 0
+            for enemy in enemies_group:
                 enemy.let_out(all_sprites)
 
         for event in pygame.event.get():
@@ -327,8 +382,6 @@ def main():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     sword_anim_idx = 0
-
-
 
         # Rendering
 
@@ -366,14 +419,8 @@ def main():
                                            frame.get_width(), frame.get_height())
             for enemy in enemies_group:
                 if enemy.alive():
-                    if pygame.sprite.collide_mask(sprite, enemy) and enemy.alive():
+                    if pygame.sprite.collide_mask(sprite, enemy):
                         enemy.health -= attack_power
-                    if enemy.health <= 0:
-                        if not enemy.dying:
-                            enemy.change_frame(Enemy.dying)
-                        if int(enemy.progress) == len(enemy.frames) - 1:
-                            enemy.kill()
-                        enemy.dying = True
         else:
             rotated_sword_im = pygame.transform.rotate(sword_im, math.degrees(math.atan2(mainAngle.sin, mainAngle.cos)))
             pos = (hero.rect.x + hero.image.get_width() // 2, int(hero.rect.y + hero.image.get_height() * 2 / 3))
@@ -384,10 +431,29 @@ def main():
         else:
             frame_offset += (-frame_offset) / 50
 
+        for enemy in enemies_group:
+            if enemy.health <= 0:
+                if not enemy.dying:
+                    enemy.change_frame(Enemy.dying)
+                    enemy.progress = 0
+                if int(enemy.progress) >= len(enemy.frames) - 1:
+                    print(1)
+                    enemy.kill()
+                    thunder_sound.play()
+                enemy.dying = True
+
         pygame.draw.rect(screen, (5, 18, 24),
                          pygame.Rect(0, screen.get_height() - frame_offset, screen.get_width(), 15))
         pygame.draw.rect(screen, (5, 18, 24), pygame.Rect(0, -15 + frame_offset, screen.get_width(), 15))
+
+        # GUI
+        screen.blit(health_bar_img, (2, 2))
+        surf = pygame.Surface((max((health_bar_img.get_width() - 2) * hero.health / MAX_HERO_HEALTH, 0),
+                               health_bar_img.get_height() - 2))
+        surf.fill((210, 31, 60))
+        screen.blit(surf, (3, 3))
         pygame.display.flip()
+        print(hero.health)
     pygame.quit()
 
 

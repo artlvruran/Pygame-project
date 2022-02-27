@@ -39,3 +39,33 @@ def start_screen(screen, clock):
                 return
             pygame.display.flip()
             clock.tick(FPS)
+
+
+def game_over_text_screen(last_frame, screen_text, screen, clock):
+    timer = 0
+    going = True
+    while going:
+        screen.blit(last_frame, (0, 0))
+        timer += 1
+        timer %= 20
+        black_surf = pygame.Surface((WIDTH, HEIGHT))
+        black_surf.set_alpha(int(timer * 12.75))
+        screen.blit(black_surf, (0, 0))
+        font = pygame.font.SysFont('bauhaus 93', 50)
+        text = font.render("", True, (100, 255, 100))
+        text = font.render(screen_text, True, (100, 255, 100))
+        text_x = WIDTH // 2 - text.get_width() // 2
+        text_y = HEIGHT // 2 - text.get_height() // 2
+        screen.blit(text, (text_x, text_y))
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_r:
+                    going = False
+
+        screen.blit(pygame.transform.scale(screen, (WIDTH, HEIGHT)), (0, 0))
+        pygame.display.update()
+        clock.tick(60)
