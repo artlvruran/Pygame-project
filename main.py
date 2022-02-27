@@ -263,14 +263,20 @@ def level_sort(level, field):
     if level == 1:
         enemies = [Enemy(11 * field.tile_size - spawn[level][0], 11 * field.tile_size - spawn[level][1], all_sprites, 8, 50)]
     if level == 2:
-        enemies = [Enemy(9 * field.tile_size - spawn[level][0], 10 * field.tile_size - spawn[level][1], all_sprites, 11, 70),
-                   Enemy(24 * field.tile_size - spawn[level][0], 27 * field.tile_size - spawn[level][1], all_sprites, 11, 70)]
+        enemies = [Enemy(9 * field.tile_size - spawn[level][0], 10 * field.tile_size - spawn[level][1], all_sprites,
+                         11, 70),
+                   Enemy(24 * field.tile_size - spawn[level][0], 27 * field.tile_size - spawn[level][1], all_sprites,
+                         11, 70)]
     if level == 3:
-        enemies = [Enemy(13 * field.tile_size - spawn[level][0], 24 * field.tile_size - spawn[level][1], all_sprites, 11, 100),
-                   Enemy(26 * field.tile_size - spawn[level][0], 9 * field.tile_size - spawn[level][1], all_sprites, 11, 100)]
+        enemies = [Enemy(13 * field.tile_size - spawn[level][0], 24 * field.tile_size - spawn[level][1], all_sprites,
+                         11, 100),
+                   Enemy(26 * field.tile_size - spawn[level][0], 9 * field.tile_size - spawn[level][1], all_sprites,
+                         11, 100)]
     if level == 4:
-        enemies = [Enemy(4 * field.tile_size - spawn[level][0], 18 * field.tile_size - spawn[level][1], all_sprites, 15, 100),
-                   Enemy(29 * field.tile_size - spawn[level][0], 15 * field.tile_size - spawn[level][1], all_sprites, 5, 150)]
+        enemies = [Enemy(4 * field.tile_size - spawn[level][0], 18 * field.tile_size - spawn[level][1], all_sprites,
+                         20, 100),
+                   Enemy(30 * field.tile_size - spawn[level][0], 8 * field.tile_size - spawn[level][1], all_sprites, 20,
+                         150)]
     return enemies
 
 

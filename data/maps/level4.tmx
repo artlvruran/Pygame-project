@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.5" tiledversion="1.7.2" orientation="orthogonal" renderorder="right-down" width="32" height="32" tilewidth="32" tileheight="32" infinite="0" nextlayerid="4" nextobjectid="1">
+ <tileset firstgid="1" name="TX Tileset Stone Ground" tilewidth="32" tileheight="32" tilecount="64" columns="8">
+  <image source="TX Tileset Stone Ground.png" width="256" height="256"/>
+ </tileset>
+ <tileset firstgid="65" name="TX Tileset Wall" tilewidth="32" tileheight="32" tilecount="256" columns="16">
+  <image source="TX Tileset Wall.png" width="512" height="512"/>
+ </tileset>
+ <tileset firstgid="321" name="TX Props" tilewidth="32" tileheight="32" tilecount="256" columns="16">
+  <image source="TX Props.png" width="512" height="512"/>
+ </tileset>
+ <tileset firstgid="577" name="TX Tileset Grass" tilewidth="32" tileheight="32" tilecount="64" columns="8">
+  <image source="TX Tileset Grass.png" width="256" height="256"/>
+ </tileset>
+ <layer id="1" name="Слой тайлов 1" width="32" height="32">
+  <data encoding="base64" compression="zlib">
+   eJztzbEJACAQBMGP7U/EAkS+EBG79gJ7uMANJp4aEc2ky5Bpku8vJvz8/Pz8/Pz8/Pz8/Pz//Eu2yZEL+DRh8w==
+  </data>
+ </layer>
+ <layer id="2" name="Слой тайлов 2" width="32" height="32">
+  <data encoding="base64" compression="zlib">
+   eJztySERAEAIADDob4nyAT8BHBKx2UUAALDxsr8aDgAu+L36AUs=
+  </data>
+ </layer>
+ <layer id="3" name="Слой тайлов 3" width="32" height="32">
+  <data encoding="base64" compression="zlib">
+   eJztwQENAAAAwqD3T20PBxQAAADwbhAAAAE=
+  </data>
+ </layer>
+</map>
