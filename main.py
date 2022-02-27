@@ -53,6 +53,28 @@ spawn = {
     5: (5, 4)
 }
 
+screen_rect = pygame.Rect(0, 0, WIDTH, HEIGHT)
+
+
+class AnimatedSprite(pygame.sprite.Sprite):
+    def __init__(self, list_of_frames, x, y, all_sprites):
+        super().__init__(all_sprites)
+        self.frames = list_of_frames
+        self.cur_frame = 0
+        self.image = self.frames[self.cur_frame]
+        self.rect = pygame.Rect(x, y, self.frames[self.cur_frame].get_width(),
+                                self.frames[self.cur_frame].get_height())
+        self.rect = self.rect.move(x, y)
+
+    def update(self):
+        self.cur_frame = (self.cur_frame + 1) % len(self.frames)
+        self.image = self.frames[self.cur_frame]
+
+    def change_frame(self, list_of_frames):
+        self.frames = list_of_frames
+        self.cur_frame = 0
+        self.image = self.frames[self.cur_frame]
+
 
 class Field:
     free_tiles = {
@@ -263,7 +285,8 @@ class Camera:
 
 def level_sort(level, field):
     if level == 1:
-        enemies = [Enemy(11 * field.tile_size - spawn[level][0], 11 * field.tile_size - spawn[level][1], all_sprites, 8, 50)]
+        enemies = [Enemy(11 * field.tile_size - spawn[level][0], 11 * field.tile_size - spawn[level][1], all_sprites,
+                         8, 50)]
     if level == 2:
         enemies = [Enemy(9 * field.tile_size - spawn[level][0], 10 * field.tile_size - spawn[level][1], all_sprites,
                          11, 70),
@@ -282,10 +305,10 @@ def level_sort(level, field):
     if level == 5:
         enemies = [Enemy(31 * field.tile_size - spawn[level][0], 16 * field.tile_size - spawn[level][1], all_sprites,
                          100, 150),
-                   Enemy(9 * field.tile_size - spawn[level][0], 26 * field.tile_size - spawn[level][1], all_sprites, 100,
-                         150),
-                   Enemy(52 * field.tile_size - spawn[level][0], 8 * field.tile_size - spawn[level][1], all_sprites, 100,
-                         150)
+                   Enemy(9 * field.tile_size - spawn[level][0], 26 * field.tile_size - spawn[level][1], all_sprites,
+                         100, 150),
+                   Enemy(52 * field.tile_size - spawn[level][0], 8 * field.tile_size - spawn[level][1], all_sprites,
+                         100, 150)
                    ]
     return enemies
 
@@ -502,8 +525,8 @@ def main():
             sprite = pygame.sprite.Sprite()
             sprite.image = frame
             sprite.rect = pygame.Rect(hero.rect.x + (hero.image.get_width() - frame.get_width()) // 2,
-                                           hero.rect.y + (hero.image.get_height() - frame.get_height()) // 2,
-                                           frame.get_width(), frame.get_height())
+                                      hero.rect.y + (hero.image.get_height() - frame.get_height()) // 2,
+                                      frame.get_width(), frame.get_height())
             for enemy in enemies_group:
                 if enemy.alive():
                     if pygame.sprite.collide_mask(sprite, enemy):
