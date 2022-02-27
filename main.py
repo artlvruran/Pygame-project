@@ -49,7 +49,8 @@ spawn = {
     1: (30, 4),
     2: (15, 14),
     3: (6, 6),
-    4: (17, 4)
+    4: (17, 4),
+    5: (5, 4)
 }
 
 
@@ -58,7 +59,8 @@ class Field:
         1: 74,
         2: 10,
         3: 10,
-        4: 10
+        4: 10,
+        5: 10
     }
 
     def __init__(self, filename, spawn_pos, level):
@@ -188,9 +190,9 @@ mainAngle = Angle()
 
 
 class Hero(AnimatedSprite):
-    im_1 = pygame.transform.scale(load_image('explorer_run1.png'), (40, 60))
-    im_2 = pygame.transform.scale(load_image('explorer_run2.png'), (40, 60))
-    idle = pygame.transform.scale(load_image('explorer_idle.png'), (40, 60))
+    im_1 = pygame.transform.scale(load_image('explorer_run1.png'), (40, 80))
+    im_2 = pygame.transform.scale(load_image('explorer_run2.png'), (40, 80))
+    idle = pygame.transform.scale(load_image('explorer_idle.png'), (40, 80))
 
     def __init__(self, pos_x, pos_y):
         self.idle_frame = [Hero.idle]
@@ -277,11 +279,19 @@ def level_sort(level, field):
                          20, 100),
                    Enemy(30 * field.tile_size - spawn[level][0], 8 * field.tile_size - spawn[level][1], all_sprites, 20,
                          150)]
+    if level == 5:
+        enemies = [Enemy(31 * field.tile_size - spawn[level][0], 16 * field.tile_size - spawn[level][1], all_sprites,
+                         100, 150),
+                   Enemy(9 * field.tile_size - spawn[level][0], 26 * field.tile_size - spawn[level][1], all_sprites, 100,
+                         150),
+                   Enemy(52 * field.tile_size - spawn[level][0], 8 * field.tile_size - spawn[level][1], all_sprites, 100,
+                         150)
+                   ]
     return enemies
 
 
 def main():
-    level = 4
+    level = 1
     field = Field(f'level{level}.tmx', spawn[level], level)
 
     tile_width = field.tile_size
@@ -356,7 +366,7 @@ def main():
                 elem.kill()
 
             level += 1
-            if level == 5:
+            if level == 6:
                 level = 1
             field = Field(f'level{level}.tmx', spawn[level], level)
 
@@ -431,17 +441,17 @@ def main():
             hero.rect.x = hero_render[0]
             camera.dx += hero.dx
 
+        enemy_progress += 1
         for enemy in enemies_group:
             enemy.rect.x = enemy.x - camera.dx
             enemy.rect.y = enemy.y - camera.dy
-            enemy_progress += 0.5
             for projectile in enemy.particles:
                 if projectile.alive():
                     projectile.rect.x = projectile.rect.x - projectile.pos[0] + enemy.rect.x
                     projectile.rect.y = projectile.rect.y - projectile.pos[1] + enemy.rect.y
                     projectile.pos = [enemy.rect.x, enemy.rect.y]
 
-        if enemy_progress == 50:
+        if enemy_progress >= 50:
             enemy_progress = 0
             for enemy in enemies_group:
                 enemy.let_out(all_sprites)
@@ -455,6 +465,9 @@ def main():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     sword_anim_idx = 0
+
+        hero.health += 0.1
+        hero.health = min(MAX_HERO_HEALTH, hero.health)
 
         # Rendering
 
@@ -511,7 +524,6 @@ def main():
                     enemy.change_frame(Enemy.dying)
                     enemy.progress = 0
                 if int(enemy.progress) >= len(enemy.frames) - 1:
-                    print(1)
                     enemy.kill()
                     thunder_sound.play()
                 enemy.dying = True
@@ -527,7 +539,6 @@ def main():
         surf.fill((210, 31, 60))
         screen.blit(surf, (3, 3))
         pygame.display.flip()
-        print(hero.health)
     pygame.quit()
 
 

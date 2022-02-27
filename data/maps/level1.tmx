@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.5" tiledversion="1.7.2" orientation="orthogonal" renderorder="right-down" width="64" height="32" tilewidth="32" tileheight="32" infinite="0" nextlayerid="3" nextobjectid="1">
+ <tileset firstgid="1" name="TX Tileset Grass" tilewidth="32" tileheight="32" tilecount="64" columns="8">
+  <image source="TX Tileset Grass.png" width="256" height="256"/>
+ </tileset>
+ <tileset firstgid="65" name="TX Tileset Stone Ground" tilewidth="32" tileheight="32" tilecount="64" columns="8">
+  <image source="TX Tileset Stone Ground.png" width="256" height="256"/>
+ </tileset>
+ <tileset firstgid="129" name="TX Tileset Wall" tilewidth="32" tileheight="32" tilecount="256" columns="16">
+  <image source="TX Tileset Wall.png" width="512" height="512"/>
+  <wangsets>
+   <wangset name="walls" type="corner" tile="-1">
+    <wangcolor name="wall" color="#ff0000" tile="-1" probability="1"/>
+   </wangset>
+  </wangsets>
+ </tileset>
+ <tileset firstgid="385" name="TX Props" tilewidth="32" tileheight="32" tilecount="256" columns="16">
+  <image source="TX Props.png" width="512" height="512"/>
+ </tileset>
+ <layer id="1" name="Слой тайлов 1" width="64" height="32">
+  <data encoding="base64" compression="zlib">
+   eJztz7EJgDAUBNDM534iDiDiICJO4gi2prAKSZoELHzFNZcPlzeGEKYkV6Zr7Us3vbdrO+nbHLPErEnuTNfal256b9d20rft9Q8/DT8///f/4Ofn5+fn5+fn5+fn5+fn5+fn5+fn5+fn7+nfY46f5ox5AFARtTE=
+  </data>
+ </layer>
+ <layer id="2" name="Слой тайлов 2" width="64" height="32">
+  <data encoding="base64" compression="zlib">
+   eJztz7ERgDAQA0HZMVABUAHQO1CBcWNWFXzwtzPKdVKMu0iP95agA8Gauz+vJ+0HAADIZqrS7C01+kmM1d2btyftP9x9elfSfgAAAAAAAPxjAOVIBXo=
+  </data>
+ </layer>
+</map>
