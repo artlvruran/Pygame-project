@@ -16,8 +16,8 @@
             "scale": 0.5,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 832,
-                "y": 668
+                "x": 722,
+                "y": 666
             }
         },
         "level1.tmx#DZwhLm9XUAE28hU": {
@@ -70,8 +70,8 @@
             "scale": 0.5,
             "selectedLayer": 2,
             "viewCenter": {
-                "x": 538,
-                "y": 552
+                "x": 536,
+                "y": 550
             }
         },
         "level3.tmx#TX Props": {
@@ -87,8 +87,8 @@
             "scale": 0.75,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 436,
-                "y": 533.3333333333333
+                "x": 434.66666666666663,
+                "y": 532
             }
         },
         "level4.tmx#TX Props": {
@@ -102,6 +102,23 @@
         },
         "level4.tmx#TX Tileset Wall": {
             "scaleInDock": 1
+        },
+        "level5.tmx": {
+            "scale": 0.33,
+            "selectedLayer": 2,
+            "viewCenter": {
+                "x": 924.2424242424241,
+                "y": 793.9393939393939
+            }
+        },
+        "level5.tmx#TX Props": {
+            "scaleInDock": 1
+        },
+        "level5.tmx#TX Tileset Stone Ground": {
+            "scaleInDock": 1
+        },
+        "level5.tmx#TX Tileset Wall": {
+            "scaleInDock": 1
         }
     },
     "last.imagePath": "C:/Users/Павел/PycharmProjects/Pygame_project/data/maps",
@@ -112,10 +129,18 @@
     "map.tileWidth": 32,
     "map.width": 32,
     "openFiles": [
-        "level1.tmx"
+        "level1.tmx",
+        "level2.tmx",
+        "level3.tmx",
+        "level4.tmx",
+        "level5.tmx"
     ],
     "project": "maps.tiled-project",
     "recentFiles": [
+        "level5.tmx",
+        "level4.tmx",
+        "level3.tmx",
+        "level2.tmx",
         "level1.tmx"
     ],
     "resizeMap.removeObjects": true,
