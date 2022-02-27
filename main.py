@@ -47,14 +47,18 @@ thunder_sound = pygame.mixer.Sound('data/music/thunder.wav')
 
 spawn = {
     1: (30, 4),
-    2: (15, 14)
+    2: (15, 14),
+    3: (6, 6),
+    4: (17, 4)
 }
 
 
 class Field:
     free_tiles = {
         1: 74,
-        2: 10
+        2: 10,
+        3: 10,
+        4: 10
     }
 
     def __init__(self, filename, spawn_pos, level):
@@ -223,7 +227,7 @@ class Hero(AnimatedSprite):
         if pygame.sprite.spritecollideany(self, projectiles_group):
             self.dx = -self.dx
             self.dy = -self.dy
-            self.health -= 15
+            self.health -= 5
 
     def increase_progress(self, amount):
         self.progress += amount
@@ -255,8 +259,23 @@ class Camera:
         self.cos = 1
 
 
+def level_sort(level, field):
+    if level == 1:
+        enemies = [Enemy(11 * field.tile_size - spawn[level][0], 11 * field.tile_size - spawn[level][1], all_sprites, 8, 50)]
+    if level == 2:
+        enemies = [Enemy(9 * field.tile_size - spawn[level][0], 10 * field.tile_size - spawn[level][1], all_sprites, 11, 70),
+                   Enemy(24 * field.tile_size - spawn[level][0], 27 * field.tile_size - spawn[level][1], all_sprites, 11, 70)]
+    if level == 3:
+        enemies = [Enemy(13 * field.tile_size - spawn[level][0], 24 * field.tile_size - spawn[level][1], all_sprites, 11, 100),
+                   Enemy(26 * field.tile_size - spawn[level][0], 9 * field.tile_size - spawn[level][1], all_sprites, 11, 100)]
+    if level == 4:
+        enemies = [Enemy(4 * field.tile_size - spawn[level][0], 18 * field.tile_size - spawn[level][1], all_sprites, 15, 100),
+                   Enemy(29 * field.tile_size - spawn[level][0], 15 * field.tile_size - spawn[level][1], all_sprites, 5, 150)]
+    return enemies
+
+
 def main():
-    level = 2
+    level = 4
     field = Field(f'level{level}.tmx', spawn[level], level)
 
     tile_width = field.tile_size
@@ -275,31 +294,26 @@ def main():
 
     running = True
 
-    hero = Hero(screen.get_width() // 4, screen.get_height() // 4)
+    hero = Hero(*spawn[level])
     player_group.add(hero)
 
     sword_anim_idx = None
 
     background_offset = 0
 
-    if level == 1:
-        enemies = [Enemy(11 * field.tile_size - spawn[level][0], 11 * field.tile_size - spawn[level][1], all_sprites, 8, 50)]
-    if level == 2:
-        enemies = [Enemy(9 * field.tile_size - spawn[level][0], 10 * field.tile_size - spawn[level][1], all_sprites, 11, 100),
-                   Enemy(24 * field.tile_size - spawn[level][0], 27 * field.tile_size - spawn[level][1], all_sprites, 11, 100)]
+    enemies = level_sort(level, field)
     enemy_progress = 0
     for enemy in enemies:
         enemies_group.add(enemy)
-
     while running:
         hero_render = [hero.rect.x, hero.rect.y]
         mx, my = pygame.mouse.get_pos()
         mainAngle.change(mx, my, (hero.rect.x, hero.rect.y))
 
         if hero.health <= 0:
-            game_over_text_screen(screen, 'You died. Press r to reply.', screen, clock)
-            hero.kill()
-            level = 2
+            text_screen(screen, 'You died. Press r to reply.', screen, clock)
+            for elem in all_sprites:
+                elem.kill()
 
             field = Field(f'level{level}.tmx', spawn[level], level)
 
@@ -323,6 +337,48 @@ def main():
             sword_anim_idx = None
 
             background_offset = 0
+
+            enemies = level_sort(level, field)
+            enemy_progress = 0
+            for enemy in enemies:
+                enemies_group.add(enemy)
+
+        if not len(enemies_group):
+            text_screen(screen, 'Level completed!', screen, clock)
+
+            for elem in all_sprites:
+                elem.kill()
+
+            level += 1
+            if level == 5:
+                level = 1
+            field = Field(f'level{level}.tmx', spawn[level], level)
+
+            tile_width = field.tile_size
+
+            cursor_sprite = Cursor(0, 0)
+
+            frame_offset = 0
+
+            pygame.mouse.set_visible(False)
+
+            camera = Camera()
+
+            screen.fill((0, 0, 0))
+
+            running = True
+
+            hero = Hero(screen.get_width() // 4, screen.get_height() // 4)
+            player_group.add(hero)
+
+            sword_anim_idx = None
+
+            background_offset = 0
+
+            enemies = level_sort(level, field)
+            enemy_progress = 0
+            for enemy in enemies:
+                enemies_group.add(enemy)
 
         hero.speed = min(1, max(0, mainAngle.hyp - 100) / 150)
         hero.speed = hero.speed ** 2
@@ -349,14 +405,25 @@ def main():
 
         pos1 = (hero_render[0], hero_render[1] + hero.image.get_height())
         pos2 = (hero_render[0] + hero.image.get_width(), hero_render[1] + hero.image.get_height())
+        pos3 = (hero.rect.x, hero_render[1] + hero.image.get_height())
+        pos4 = (hero.rect.x + hero.image.get_width(), hero_render[1] + hero.image.get_height())
+        pos5 = (hero_render[0], hero.rect.y + hero.image.get_height())
+        pos6 = (hero_render[0] + hero.image.get_width(), hero.rect.y + hero.image.get_height())
 
         hero.increase_progress(0.2)
         if field.is_free(field.get_position(*pos1, camera)) and\
                 field.is_free(field.get_position(*pos2, camera)):
             hero.rect.x, hero.rect.y = hero_render[0], hero_render[1]
-
             camera.dx += hero.dx
             camera.dy += hero.dy
+        elif field.is_free(field.get_position(*pos3, camera)) and\
+                field.is_free(field.get_position(*pos4, camera)):
+            hero.rect.y = hero_render[1]
+            camera.dy += hero.dy
+        elif field.is_free(field.get_position(*pos5, camera)) and\
+                field.is_free(field.get_position(*pos6, camera)):
+            hero.rect.x = hero_render[0]
+            camera.dx += hero.dx
 
         for enemy in enemies_group:
             enemy.rect.x = enemy.x - camera.dx
@@ -398,6 +465,7 @@ def main():
         all_sprites.draw(screen)
         screen.blit(cursor_sprite.image, cursor_sprite.rect)
 
+        # Обработка удара мечом
         if sword_anim_idx is not None:
             if sword_anim_idx == 0:
                 sword_sound.play()
